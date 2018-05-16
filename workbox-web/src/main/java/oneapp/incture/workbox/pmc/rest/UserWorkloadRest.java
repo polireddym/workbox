@@ -8,7 +8,10 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
 
+import oneapp.incture.workbox.pmc.dto.TaskCountDto;
+import oneapp.incture.workbox.pmc.dto.UserProcessDetailRequestDto;
 import oneapp.incture.workbox.pmc.dto.UserSearchRequestDto;
+import oneapp.incture.workbox.pmc.dto.responses.UserTaskStatusResponseDto;
 import oneapp.incture.workbox.pmc.dto.responses.UserWorkloadResponseDto;
 import oneapp.incture.workbox.pmc.services.UserWorkloadFacadeLocal;
 
@@ -25,7 +28,7 @@ public class UserWorkloadRest {
 	public UserWorkloadResponseDto getUserWorkLoadHeatMap(@RequestBody UserSearchRequestDto searchRequestDto) {
 		return services.getUserWorkLoadHeatMap(searchRequestDto);
 	}
-/*
+
 	@RequestMapping(value = "/status/graph", method = RequestMethod.POST)
 	public UserTaskStatusResponseDto getUserWorkLoadTaskStausGraph(@RequestBody UserProcessDetailRequestDto request) {
 		return services.getUserWorkLoadTaskStausGraph(request);
@@ -35,5 +38,5 @@ public class UserWorkloadRest {
 	public TaskCountDto getUserWorkLoadTrendGraph(@RequestBody UserProcessDetailRequestDto request) {
 		return services.getUserWorkLoadTrendGraph(request);
 	}
-*/
+
 }
