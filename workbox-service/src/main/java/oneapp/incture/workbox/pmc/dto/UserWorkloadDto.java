@@ -12,6 +12,7 @@ public class UserWorkloadDto {
 	private String userGroup;
 	private BigDecimal noOfTask;
 	private String userId;
+	
 	public String getUserName() {
 		return userName;
 	}

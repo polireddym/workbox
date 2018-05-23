@@ -36,6 +36,7 @@ public class ServicesUtil {
 	public static final String NOT_APPLICABLE = "N/A";
 	public static final String SPECIAL_CHAR = "∅";
 	public static SimpleDateFormat dateFormat = new SimpleDateFormat("yyyyMMdd");
+	
 
 	public static boolean isEmpty(Object[] objs) {
 		if (objs == null || objs.length == 0) {

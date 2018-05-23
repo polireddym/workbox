@@ -26,6 +26,7 @@ import oneapp.incture.workbox.pmc.dto.AgingGraphDto;
 import oneapp.incture.workbox.pmc.dto.AgingResponseDto;
 import oneapp.incture.workbox.pmc.dto.AgingTableDto;
 import oneapp.incture.workbox.pmc.dto.AgingTableHeaderDto;
+import oneapp.incture.workbox.pmc.dto.ManageTasksRequestDto;
 import oneapp.incture.workbox.pmc.dto.ProcessAgeingResponse;
 import oneapp.incture.workbox.pmc.dto.ProcessDetailsDto;
 import oneapp.incture.workbox.pmc.dto.ProcessDetailsResponse;
@@ -45,9 +46,9 @@ import oneapp.incture.workbox.util.ServicesUtil;
 @Repository("ProcessEventsDao")
 @Transactional
 public class ProcessEventsDao extends BaseDao<ProcessEventsDo, ProcessEventsDto> {
-	
+
 	private static final Logger logger = LoggerFactory.getLogger(ProcessEventsDao.class);
-	
+
 	@Override
 	protected ProcessEventsDo importDto(ProcessEventsDto fromDto) throws InvalidInputFault, ExecutionFault, NoResultFault {
 		ProcessEventsDo entity = new ProcessEventsDo();
@@ -99,11 +100,11 @@ public class ProcessEventsDao extends BaseDao<ProcessEventsDo, ProcessEventsDto>
 	public ProcessEventsDto getProcessDetail(String processId) {
 		ProcessEventsDto processEventsDto = null;
 		if (!ServicesUtil.isEmpty(processId)) {
-			Query query = this.getSession().createSQLQuery("select pe from ProcessEventsDo pe where pe.processId =:processId");
+			Query query = this.getSession().createQuery("select pe from ProcessEventsDo pe where pe.processId =:processId");
 			query.setParameter("processId", processId);
 			ProcessEventsDo processEventsDo = (ProcessEventsDo) query.uniqueResult();
 			if (!ServicesUtil.isEmpty(processEventsDo)) {
-				query = this.getSession().createSQLQuery("select pe from ProcessConfigDo pe where pe.processName =:processName");
+				query = this.getSession().createQuery("select pe from ProcessConfigDo pe where pe.processName =:processName");
 				query.setParameter("processName", processEventsDo.getName());
 				processEventsDto = exportDto(processEventsDo);
 				ProcessConfigDo processConfigDo = null;
@@ -135,21 +136,21 @@ public class ProcessEventsDao extends BaseDao<ProcessEventsDo, ProcessEventsDto>
 	public List<Object[]> getProcessDetail(String userId, String processName, String requestId, String labelValue, String status, Integer page) throws NoResultFault {
 		logger.error("[PMC] ProcessEventsDao getProcessDetail Started - with request - " + userId);
 		String tempQuery = "";
-//		int firstIndex = 0;
-//		int lastIndex = 0;
+		//		int firstIndex = 0;
+		//		int lastIndex = 0;
 		/*if (!ServicesUtil.isEmpty(page)) {
 			firstIndex = PMCConstant.PAGE_SIZE * (page - 1) + 1;
 			lastIndex = page * PMCConstant.PAGE_SIZE;
 		}*/
-		
-		
+
+
 		String paginationQuery = "";
-				//"SELECT * FROM (SELECT a.*, rownum R_NUM FROM (";
+		//"SELECT * FROM (SELECT a.*, rownum R_NUM FROM (";
 		String query = paginationQuery
 				+ "select DISTINCT(pe.PROCESS_ID) AS PROCESS_ID, pe.STARTED_AT AS STARTED_AT, pe.STARTED_BY AS STARTED_BY, pe.SUBJECT as SUBJECT, pe.REQUEST_ID As REQUEST_ID , pe.NAME AS PROCESS_NAME, pe.STARTED_BY_DISP AS STARTED_BY_DISP, pc.PROCESS_DISPLAY_NAME AS PROCESS_DISPLAY_NAME from task_owners tw left join task_events te on tw.event_id = te.event_id left join process_events pe on pe.process_id = te.process_id LEFT JOIN PROCESS_CONFIG_TB pc ON pc.PROCESS_NAME   = pe.NAME where tw.task_owner='"
 				+ userId + "'";
 		if (!ServicesUtil.isEmpty(processName) && !processName.equals(PMCConstant.SEARCH_ALL)) {
-			tempQuery = tempQuery + " and pe.PROCESS_ID IN (select D.process_id from PROCESS_EVENTS D where D.name IN( " + processName + "))";
+			tempQuery = tempQuery + " and pe.PROCESS_ID IN (select D.process_id from PROCESS_EVENTS D where D.name IN(' " + processName + "'))";
 		}
 		if (!ServicesUtil.isEmpty(requestId)) {
 			tempQuery = tempQuery + " and pe.REQUEST_ID = '" + requestId + "'";
@@ -174,23 +175,23 @@ public class ProcessEventsDao extends BaseDao<ProcessEventsDo, ProcessEventsDto>
 		}else{
 			paginationQuery = ")a)";
 		}
-*/
+		 */
 		query = query + paginationQuery;
-		
+
 		if (!ServicesUtil.isEmpty(page) && page > 0) {
 			int first = (page - 1) * PMCConstant.PAGE_SIZE;
 			int last = PMCConstant.PAGE_SIZE;
-			
+
 			/* Commented for Pagination in HANA */
-//			q.setFirstResult(first);
-//			q.setMaxResults(last);
-			
+			//			q.setFirstResult(first);
+			//			q.setMaxResults(last);
+
 			query += " LIMIT "+last+" OFFSET "+first+"";
 		}
-		
+
 		logger.error("get - " + query);
 		Query q = this.getSession().createSQLQuery(query);
-		
+
 		List<Object[]> resultList = q.list();
 		if (ServicesUtil.isEmpty(resultList)) {
 			throw new NoResultFault("NO RECORD FOUND");
@@ -251,7 +252,7 @@ public class ProcessEventsDao extends BaseDao<ProcessEventsDo, ProcessEventsDto>
 			tempQuery = tempQuery + " and pe.PROCESS_ID IN (select D.process_id from PROCESS_EVENTS D where D.name IN (" + processName + "))";
 		}
 		String groupQuery = " group by to_date(pe.STARTED_AT), pe.NAME, pc.PROCESS_DISPLAY_NAME ORDER BY to_date(pe.STARTED_AT)";
-				//" group by trunc(pe.STARTED_AT), pe.NAME, pc.PROCESS_DISPLAY_NAME ORDER BY trunc(pe.STARTED_AT)";
+		//" group by trunc(pe.STARTED_AT), pe.NAME, pc.PROCESS_DISPLAY_NAME ORDER BY trunc(pe.STARTED_AT)";
 		query = query + tempQuery + groupQuery;
 		logger.error("get - " + query);
 		Query q = this.getSession().createSQLQuery(query);
@@ -268,7 +269,7 @@ public class ProcessEventsDao extends BaseDao<ProcessEventsDo, ProcessEventsDto>
 		String query = "select COUNT(DISTINCT(pe.PROCESS_ID)) AS PROCESS_COUNT from task_owners tw left join task_events te on tw.event_id = te.event_id left join process_events pe on pe.process_id = te.process_id where tw.task_owner='"
 				+ userId + "'";
 		if (!ServicesUtil.isEmpty(processName) && !processName.equals(PMCConstant.SEARCH_ALL)) {
-			tempQuery = tempQuery + " and pe.PROCESS_ID IN (select D.process_id from PROCESS_EVENTS D where D.name IN (" + processName + "))";
+			tempQuery = tempQuery + " and pe.PROCESS_ID IN (select D.process_id from PROCESS_EVENTS D where D.name IN ('" + processName + "'))";
 		}
 		if (!ServicesUtil.isEmpty(requestId)) {
 			tempQuery = tempQuery + " and pe.REQUEST_ID = '" + requestId + "'";
@@ -369,20 +370,20 @@ public class ProcessEventsDao extends BaseDao<ProcessEventsDo, ProcessEventsDto>
 							+ "'"+ newDf.format(startDateFrom)+"' and '" +newDf.format(startDateTo)+"'");
 					//+ " TO_DATE('" + dateFormatter.format(startDateFrom) + "', 'DD/MM/YY hh:mi:ss AM') and TO_DATE('" + dateFormatter.format(startDateTo) + "', 'DD/MM/YY hh:mi:ss PM')");
 				}
-				
+
 				if (!ServicesUtil.isEmpty(processDetailsDto.getPage())) {
 					int first = (processDetailsDto.getPage() - 1) * PMCConstant.PAGE_SIZE;
 					int last = PMCConstant.PAGE_SIZE;
-					
+
 					/* Commented for Pagination in HANA */
-//					query.setFirstResult(first);
-//					query.setMaxResults(last);
-					
+					//					query.setFirstResult(first);
+					//					query.setMaxResults(last);
+
 					processQuery = processQuery.append(" LIMIT "+last+" OFFSET "+first+"");
 				}
-				
+
 				Query query = this.getSession().createSQLQuery(processQuery.toString());
-				
+
 				logger.error("processQuery - " + processQuery.toString());
 				List<Object[]> resultList = query.list();
 				DateFormat formatter = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ssZ");
@@ -634,11 +635,11 @@ public class ProcessEventsDao extends BaseDao<ProcessEventsDo, ProcessEventsDto>
 			}
 		}
 		totalDto.setCount(count);
-//		totalDto.setOldDataMap(totalMap);
+		//		totalDto.setOldDataMap(totalMap);
 		totalDto.setDataMap(ServicesUtil.generateMapDtoFromMap(totalMap));
 		processAgingTableDtos.add(totalDto);
 		response.setStatus("SUCCESS");
-//		response.setHeaderMap(headerMap);
+		//		response.setHeaderMap(headerMap);
 		response.setHeaderMap(ServicesUtil.generateMapDtoFromMap(headerMap));
 		response.setTupleDtos(processAgingTableDtos);
 		return response;
@@ -664,28 +665,101 @@ public class ProcessEventsDao extends BaseDao<ProcessEventsDo, ProcessEventsDto>
 		}
 		return null;
 	}
-	
-	public String createProcessInstance(ProcessEventsDto dto) {
-	//	  logger.error("[PMC][ProcessEventsDao][createProcessInstance]initiated with " + dto);
-			try {
-				//this.getEntityManager().getTransaction().begin();
-				create(dto);
-			//	this.getEntityManager().getTransaction().commit();
-				return "SUCCESS";
-			} catch (Exception e) {
-				logger.error("[PMC][ProcessEventsDao][createProcessInstance][error] " + e.getMessage());
-			}
-			return "FAILURE";
-		}
 
-		public String updateProcessInstance(ProcessEventsDto dto) {
-		//	logger.error("[PMC][ProcessEventsDao][updateProcessInstance]initiated with " + dto);
-			try {
-				update(dto);
-				return "SUCCESS";
-			} catch (Exception e) {
-				logger.error("[PMC][ProcessEventsDao][updateProcessInstance][error] " + e.getMessage());
-			}
-			return "FAILURE";
+	public String createProcessInstance(ProcessEventsDto dto) {
+		//	  logger.error("[PMC][ProcessEventsDao][createProcessInstance]initiated with " + dto);
+		try {
+			//this.getEntityManager().getTransaction().begin();
+			create(dto);
+			//	this.getEntityManager().getTransaction().commit();
+			return "SUCCESS";
+		} catch (Exception e) {
+			logger.error("[PMC][ProcessEventsDao][createProcessInstance][error] " + e.getMessage());
 		}
+		return "FAILURE";
+	}
+
+	public String updateProcessInstance(ProcessEventsDto dto) {
+		//	logger.error("[PMC][ProcessEventsDao][updateProcessInstance]initiated with " + dto);
+		try {
+			update(dto);
+			return "SUCCESS";
+		} catch (Exception e) {
+			logger.error("[PMC][ProcessEventsDao][updateProcessInstance][error] " + e.getMessage());
+		}
+		return "FAILURE";
+	}
+
+	@SuppressWarnings("unchecked")
+	public List<Object[]> getTasksDetailsByUserAndDuration(ManageTasksRequestDto request){		
+		Date startDateFrom = null;
+		Date startDateTo = null;
+		List<Object[]> resultList=null;
+		try {
+			startDateFrom = ServicesUtil.getDate(request.getStartDayFrom());
+			startDateTo = ServicesUtil.getDate(request.getStartDayTo());
+			startDateTo = ServicesUtil.setEndTime(startDateTo);
+			logger.error("startDate  - " + startDateFrom);
+			logger.error("endDate  - " + startDateTo);
+			StringBuffer taskStr = new StringBuffer(
+					"SELECT p.REQUEST_ID AS REQUEST_ID, p.NAME AS NAME, t.EVENT_ID AS EVENT_ID, t.SUBJECT AS SUBJECT, t.CREATED_AT AS CREATED_AT, t.STATUS AS STATUS, v.TASK_OWNER AS TASK_OWNER, v.TASK_OWNER_DISP AS TASK_OWNER_DISP, c.PROCESS_DISPLAY_NAME AS PROCESS_DISP_NAME FROM PROCESS_EVENTS p LEFT OUTER JOIN PROCESS_CONFIG_TB c ON p.NAME = c.PROCESS_NAME, TASK_EVENTS t, TASK_OWNERS v where p.PROCESS_ID=t.PROCESS_ID and v.EVENT_ID=t.EVENT_ID and p.STATUS = \'IN_PROGRESS\'");
+			if (!ServicesUtil.isEmpty(request.getProcessName()) || !ServicesUtil.isEmpty(request.getLabelValue())
+					|| !ServicesUtil.isEmpty(request.getRequestId())) {
+				taskStr.append(" and t.PROCESS_ID IN (select D.PROCESS_ID from PROCESS_EVENTS D where 1=1");
+				if (!request.getProcessName().equals(PMCConstant.SEARCH_ALL))
+					taskStr.append(" and D.NAME IN ('" + request.getProcessName() + "')");
+				if (!ServicesUtil.isEmpty(request.getLabelValue()))
+					taskStr.append(" and D.SUBJECT like '%" + request.getLabelValue() + "%'");
+				if (!ServicesUtil.isEmpty(request.getRequestId()))
+					taskStr.append(" and D.REQUEST_ID = '" + request.getRequestId() + "'");
+			}
+			if (request.getStartDayFrom() >= 0 && request.getStartDayTo() >= 0) {
+				// DateFormat dateFormatter = new SimpleDateFormat("dd-MM-yy
+				// hh:mm:ss a");
+				DateFormat newDf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+				// taskStr.append(" and t.CREATED_AT between TO_DATE('" +
+				// dateFormatter.format(startDateFrom) + "', 'DD/MM/YY hh:mi:ss
+				// AM') and TO_DATE('" + dateFormatter.format(startDateTo) + "',
+				// 'DD/MM/YY hh:mi:ss PM')");
+
+				taskStr.append(" and t.CREATED_AT between '" + newDf.format(startDateFrom) + "' and '"
+						+ newDf.format(startDateTo) + "'");
+
+				// + "'" + dateFormatter.format(startDateFrom) + "' and '" +
+				// dateFormatter.format(startDateTo) + "'");
+			}
+			taskStr.append(")");
+			if (!ServicesUtil.isEmpty(request.getOwner())) {
+				if (!ServicesUtil.isEmpty(request.getTaskStatus())) {
+					if (PMCConstant.SEARCH_RESERVED.equalsIgnoreCase(request.getTaskStatus())) {
+						taskStr.append(" AND t.STATUS = '" + request.getTaskStatus() + "' AND t.CUR_PROC = '"
+								+ request.getOwner() + "' AND v.IS_PROCESSED = \'1\'");
+					} else if (PMCConstant.SEARCH_READY.equalsIgnoreCase(request.getTaskStatus())) {
+						taskStr.append(" AND t.STATUS = '" + PMCConstant.TASK_STATUS_READY
+								+ "' AND t.EVENT_ID IN (SELECT t.EVENT_ID FROM TASK_OWNERS v WHERE t.EVENT_ID = v.EVENT_ID AND v.TASK_OWNER = '"
+								+ request.getOwner() + "')");
+					} else {
+						taskStr.append(" AND (t.STATUS = '" + PMCConstant.TASK_STATUS_READY
+								+ "' AND t.EVENT_ID IN (SELECT t.EVENT_ID FROM TASK_OWNERS v WHERE t.EVENT_ID = v.EVENT_ID AND v.TASK_OWNER = '"
+								+ request.getOwner() + "')  OR (t.STATUS = '" + PMCConstant.TASK_STATUS_RESERVED
+								+ "' AND v.IS_PROCESSED = \'1\' AND t.CUR_PROC = '" + request.getOwner() + "'))");
+					}
+				}
+			}
+			Query query = this.getSession().createSQLQuery(taskStr.toString());
+			logger.error("Query: " + taskStr);
+			/*
+			 * if (!ServicesUtil.isEmpty(request.getPage())) { int first =
+			 * (request.getPage() - 1) * PMCConstant.PAGE_SIZE; int last =
+			 * PMCConstant.PAGE_SIZE; query.setFirstResult(first);
+			 * query.setMaxResults(last); }
+			 */
+			resultList = query.list();
+			
+
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		return resultList;
+	}
 }

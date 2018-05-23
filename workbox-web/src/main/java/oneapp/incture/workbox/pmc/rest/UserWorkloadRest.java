@@ -30,13 +30,14 @@ public class UserWorkloadRest {
 	}
 
 	@RequestMapping(value = "/status/graph", method = RequestMethod.POST)
-	public UserTaskStatusResponseDto getUserWorkLoadTaskStausGraph(@RequestBody UserProcessDetailRequestDto request) {
+	public UserTaskStatusResponseDto getUserWorkLoadTaskStausGraph(@RequestBody UserProcessDetailRequestDto request){
 		return services.getUserWorkLoadTaskStausGraph(request);
 	}
 
 	@RequestMapping(value = "/trend/graph", method = RequestMethod.POST)
-	public TaskCountDto getUserWorkLoadTrendGraph(@RequestBody UserProcessDetailRequestDto request) {
+	public TaskCountDto getUserWorkLoadTrendGraph(@RequestBody UserProcessDetailRequestDto request){
 		return services.getUserWorkLoadTrendGraph(request);
-	}
+	}	
+	
 
 }

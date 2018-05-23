@@ -102,16 +102,16 @@ public class TaskEventsDo implements BaseDo, Serializable {
 	@Column(name = "ORIGIN", length = 30)
 	private String origin;
 
-	@Column(name = "PREV_TASK", length = 32)
-	private String prevTask;
+	/*@Column(name = "PREV_TASK", length = 32)
+	private String prevTask;*/
 	
-	public String getPrevTask() {
+	/*public String getPrevTask() {
 		return prevTask;
 	}
 
 	public void setPrevTask(String prevTask) {
 		this.prevTask = prevTask;
-	}
+	}*/
 
 	public TaskEventsDoPK getTaskEventsDoPK() {
 		return taskEventsDoPK;
@@ -278,8 +278,9 @@ public class TaskEventsDo implements BaseDo, Serializable {
 				+ ", completionDeadLine=" + completionDeadLine + ", currentProcessorDisplayName="
 				+ currentProcessorDisplayName + ", processName=" + processName + ", statusFlag=" + statusFlag
 				+ ", taskMode=" + taskMode + ", taskType=" + taskType + ", forwardedAt=" + forwardedAt
-				+ ", forwardedBy=" + forwardedBy + ", url=" + url + ", origin=" + origin + ", prevTask=" + prevTask
-				+ "]";
+				+ ", forwardedBy=" + forwardedBy + ", url=" + url + ", origin=" + origin + "]";
 	}
+
+	
 
 }

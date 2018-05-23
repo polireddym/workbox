@@ -32,7 +32,7 @@ import oneapp.incture.workbox.util.ServicesUtil;
 public class TaskEventsDao extends BaseDao<TaskEventsDo, TaskEventsDto> {
 
 	private static final Logger logger = LoggerFactory.getLogger(TaskEventsDao.class);
-	
+
 	@Override
 	protected TaskEventsDto exportDto(TaskEventsDo entity) {
 		TaskEventsDto taskEventsDto = new TaskEventsDto();
@@ -365,7 +365,7 @@ public class TaskEventsDao extends BaseDao<TaskEventsDo, TaskEventsDto> {
 
 
 	public String createTaskInstance(TaskEventsDto dto) {
-	//	logger.error("[PMC][TaskEventsDao][createTaskInstance]initiated with " + dto);
+		//	logger.error("[PMC][TaskEventsDao][createTaskInstance]initiated with " + dto);
 
 		try {
 			this.create(dto);
@@ -378,7 +378,7 @@ public class TaskEventsDao extends BaseDao<TaskEventsDo, TaskEventsDto> {
 	}
 
 	public String updateTaskInstance(TaskEventsDto dto) {
-	//	logger.error("[PMC][TaskEventsDao][updateTaskInstance]initiated with " + dto);
+		//	logger.error("[PMC][TaskEventsDao][updateTaskInstance]initiated with " + dto);
 		try {
 			update(dto);
 			return "SUCCESS";
@@ -390,7 +390,7 @@ public class TaskEventsDao extends BaseDao<TaskEventsDo, TaskEventsDto> {
 	}
 
 	public String updateTaskEventToReady(String instanceId) {
-	//	logger.error("[PMC][TaskOwnersDao][setTaskOwnersToReady][instanceId]"+instanceId);
+		//	logger.error("[PMC][TaskOwnersDao][setTaskOwnersToReady][instanceId]"+instanceId);
 		try{
 			String queryString = "Update TaskEventsDo te set te.status = 'READY' , te.currentProcessor = '' , te.currentProcessorDisplayName = '' where te.taskEventsDoPK.eventId = '"+instanceId+"'";
 			Query q = this.getSession().createSQLQuery(queryString);
@@ -452,6 +452,26 @@ public class TaskEventsDao extends BaseDao<TaskEventsDo, TaskEventsDto> {
 		}
 		return "FAILURE";
 
+	}
+	@SuppressWarnings("unchecked")
+	public List<TaskEventsDo>	getTaskDetailsByProcessId(String processId){
+
+		Query query = this.getSession()
+				.createQuery("select te from TaskEventsDo te where te.taskEventsDoPK.processId =:processId");
+		query.setParameter("processId", processId);
+		return query.list();
+	}
+
+	@SuppressWarnings("unchecked")
+	public List<Object[]>  getSLAByNameAndProcessId(String name,String processId){
+
+		String qry = "select A.SLA AS SLA, A.URGENT_SLA AS URGENT_SLA from TASK_SLA A where TASK_DEF='"
+				+ name
+				+ "' and PROC_NAME IN( select PROC_NAME from PROCESS_EVENTS where PROCESS_ID = '"
+				+ processId+ "')";
+		logger.error("Query: " + qry);
+		Query query = this.getSession().createSQLQuery(qry.toString());
+		return query.list();
 	}
 
 }

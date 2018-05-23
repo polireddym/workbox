@@ -38,7 +38,7 @@ import oneapp.incture.workbox.util.ServicesUtil;
 public class TaskOwnersDao extends BaseDao<TaskOwnersDo, TaskOwnersDto> {
 
 	private static final Logger logger = LoggerFactory.getLogger(TaskOwnersDao.class);
-	
+
 	@Autowired
 	private ReportAgingDao agingDao;
 
@@ -150,7 +150,7 @@ public class TaskOwnersDao extends BaseDao<TaskOwnersDo, TaskOwnersDto> {
 				query = query + " and C.TASK_OWNER IN (" + userQuery.toString().trim() + ")";
 			String groupQuery = " group by C.TASK_OWNER, C.TASK_OWNER_DISP";
 			if (!ServicesUtil.isEmpty(processName) && !processName.equals(PMCConstant.SEARCH_ALL)) {
-				tempQuery = tempQuery + " and A.PROCESS_ID IN (select D.process_id from PROCESS_EVENTS D where D.name IN( " + processName + "))";
+				tempQuery = tempQuery + " and A.PROCESS_ID IN (select D.process_id from PROCESS_EVENTS D where D.name IN(' " + processName + "'))";
 			}
 			if (!ServicesUtil.isEmpty(status)) {
 				if (PMCConstant.SEARCH_READY.equalsIgnoreCase(status)) {
@@ -297,7 +297,7 @@ public class TaskOwnersDao extends BaseDao<TaskOwnersDo, TaskOwnersDto> {
 		}
 		return null;
 	}
-    // i have to check
+	// i have to check
 	/*@SuppressWarnings("unchecked")
 	@TransactionAttribute(TransactionAttributeType.REQUIRES_NEW)
 	public String deleteInstanceByOwner(String owner) {
@@ -368,7 +368,7 @@ public class TaskOwnersDao extends BaseDao<TaskOwnersDo, TaskOwnersDto> {
 	}
 
 	public String createTaskOwnerInstance(TaskOwnersDto dto) {
-//            System.err.println("[PMC][ConsumeODataFacade][createTaskOwnerInstance]initiated with " + dto);
+		//            System.err.println("[PMC][ConsumeODataFacade][createTaskOwnerInstance]initiated with " + dto);
 		try {
 			create(dto);
 			return "SUCCESS";
@@ -379,7 +379,7 @@ public class TaskOwnersDao extends BaseDao<TaskOwnersDo, TaskOwnersDto> {
 	}
 
 	public String updateTaskOwnerInstance(TaskOwnersDto dto) {
-//            System.err.println("[PMC][ConsumeODataFacade][updateTaskOwnerInstance]initiated with " + dto);
+		//            System.err.println("[PMC][ConsumeODataFacade][updateTaskOwnerInstance]initiated with " + dto);
 		try {
 			update(dto);
 			return "SUCCESS";
@@ -524,5 +524,13 @@ public class TaskOwnersDao extends BaseDao<TaskOwnersDo, TaskOwnersDto> {
 
 	}
 
+	@SuppressWarnings("unchecked")
+	public List<TaskOwnersDo> getTaskOwnersDetailsByEventId(String eventId){
+		Query query = this.getSession().createQuery(
+				"select tw from TaskOwnersDo tw where tw.taskOwnersDoPK.eventId =:eventId");
+		query.setParameter("eventId", eventId);
+		logger.error("Query: " + query);
+		return query.list();
+	}
 
 }

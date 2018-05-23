@@ -48,6 +48,7 @@ public class UserWorkloadFacade implements UserWorkloadFacadeLocal {
 
 	@Autowired
 	private UMEManagementEngineConsumer umeConsumer;
+	
 	@Autowired
 	private TaskOwnersDao taskOwnersDao;
 	
@@ -61,9 +62,6 @@ public class UserWorkloadFacade implements UserWorkloadFacadeLocal {
 	public UserWorkloadResponseDto getUserWorkLoadHeatMap(UserSearchRequestDto request) {
 
 		UserWorkloadResponseDto responseDto = new UserWorkloadResponseDto();
-
-		umeConsumer = new UMEManagementEngineConsumer();
-
 		ResponseMessage message = new ResponseMessage();
 		message.setStatus("SUCCESS");
 		message.setStatusCode("0");
@@ -110,14 +108,14 @@ public class UserWorkloadFacade implements UserWorkloadFacadeLocal {
 									else
 										userGroups.append(" ")
 										.append(UserGroupInfoDtos.get(i).getGroupUniqName().trim()).append(",");
-								}//end for
-							}// end if
+								}
+							}
 
 							userLoadDto.setUserGroup(userGroups.toString().trim());
-						}// end if
+						}
 
 						userLoadMap.put(userLoadDto.getUserId(), userLoadDto);
-					}
+					}//end for loop
 					if (!request.getGroupName().equals(PMCConstant.SEARCH_SMALL_ALL)) {
 						List<String> usersList = umeConsumer.getUsersAssignedInGroup(request.getGroupName());
 						if (!ServicesUtil.isEmpty(usersList)) {
